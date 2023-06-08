@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bit.dto.basicMapper">
+    <select id="logincheck" parameterType="userInfo" resultType="String">
+        select count(*) from tb_user where user = #{id} and pw = #{pw}
+    </select>
+
+    <select id="selectall" parameterType="hashmap" resultType="productInfo">
+        select No,UserID,PDName,b.Name_company,PDPrice,PDCountry,c.Name_category, PDReg, ImgName
+        from tb_productlist as a
+        inner join tb_company as b
+        on a.PDCompany = b.No_company
+        inner join tb_category as c
+        on a.PDCategory = c.No_category
+        <where>
+            <if test="'empty' != companyname">
+                AND pdcompany = #{companyname}
+            </if>
+            <if test="'empty' != searchtype">
+                AND ${searchtype} like CONCAT('%', #{txtSearch}, '%')
+            </if>
+        </where>
+        order by no desc LIMIT 10 offset #{offsetPage}
+    </select>
+    <select id="selectcount" parameterType="hashmap" resultType="int">
+        select Count(*) from tb_productlist
+         <where>
+             <if test="'empty' != companyname">
+                 AND pdcompany = #{companyname}
+             </if>
+             <if test = '"empty"!= searchtype'>
+                 AND ${searchtype} like concat('%',#{txtSearch},'%')
+             </if>
+         </where>
+    </select>
+    <select id="selectpdinfo" parameterType="hashmap" resultType="productInfo">
+        select No,UserID,PDName,b.name_company,PDPrice,PDCountry,c.name_category,PDReg,ImgName
+            from tb_productlist  as a
+            inner join tb_company as b
+            on a.PDCompany = b.no_company
+            inner join tb_category as c
+            on a.PDCategory = c.no_category
+        where no = #{no}
+    </select>
+
+    <select id="selectAddProduct" statementType="CALLABLE" parameterType="hashmap" resultType="productInfo">
+        {call SP_selectAddMyProduct(
+            #{id,mode=IN,jdbcType=VARCHAR,javaType=string},
+            #{no_company,mode=IN,jdbcType=VARCHAR,javaType=string},
+            #{name_product,mode=IN,jdbcType=VARCHAR,javaType=string}
+            )}
+    </select>
+
+    <select id="selectCompany" resultType="companyInfo">
+        select * from tb_company
+    </select>
+
+    <select id="selectCategory" resultType="categoryInfo">
+        select * from tb_category
+    </select>
+    <insert id="insertMyproduct" parameterType="hashmap">
+
+    </insert>
+    <select id="modifypdinfo" parameterType="hashmap" resultType="productInfo">
+        select * from tb_productlist where no = #{no}
+    </select>
+    <delete id="deletepdinfo" parameterType="hashmap">
+        delete from tb_productlist
+        where no = #{no}
+    </delete>
+
+
+    <insert id="addmyproduct" parameterType="productInfo">
+        insert into tb_productlist (userid,pdname,pdcompany,pdprice,pdcountry,pdcategory,pdreg,imgname)
+        values (#{userid},#{pdname},#{pdcompany},#{pdprice},#{pdcountry},#{pdcategory},now(),#{imgname})
+    </insert>
+    <update id="modifymyproduct" parameterType="productInfo">
+        <choose>
+            <when test="imgname == null">
+                update tb_productlist
+                set pdname = #{pdname},pdcountry = #{pdcountry},pdprice = #{pdprice},
+                    pdcategory = #{pdcategory},pdcompany = #{pdcompany}
+                where no = #{no}
+            </when>
+            <otherwise>
+                update tb_productlist
+                set pdname = #{pdname},pdcountry = #{pdcountry},pdprice = #{pdprice},
+                pdcategory = #{pdcategory},pdcompany = #{pdcompany}, imgname = #{imgname}
+                where no = #{no}
+            </otherwise>
+        </choose>
+    </update>
+    <select id="selectmyproductlist" statementType="CALLABLE" parameterType="hashmap" resultType="productInfo">
+        {call SP_selectmyproductlist(
+                #{id,mode=IN,jdbcType=VARCHAR,javaType=string},
+                #{no_company,mode=IN,jdbcType=VARCHAR,javaType=string},
+                #{name_product,mode=IN,jdbcType=VARCHAR,javaType=string}
+            )}
+    </select>
+    <insert id="addmycart" parameterType="hashmap">
+        insert into tb_myproduct (UserID,PDNo,SelDate,State) values (#{id},${no},now(),'N')
+    </insert>
+    <select id="mycartcheck" parameterType="hashmap">
+        select COUNT(*) from tb_myproduct where  UserID = #{id} and PDNo = #{no}
+    </select>
+    <delete id="deletemycart" parameterType="hashmap">
+        delete from tb_myproduct where UserID = #{id} and PDNo = #{no}
+    </delete>
+    <select id="selectChart" resultType="categoryCount" >
+        select  b.name_category as category,Count(*) as count
+        from tb_productlist as a
+                 inner join tb_category as b
+                            on a.PDCategory = b.no_category
+        group by b.no_category;
+    </select>
+    <insert id="addcomment" parameterType="hashmap">
+        insert into tb_comment (comment_id,pd_id,user_id,content,level,rootcommentid,parentcommentid,createdDate,updateDate)
+        values (#{comment_id},#{pd_no},#{user_id},#{comment_contents},#{level},#{rootcommentid},#{parentcommentid},now(),now())
+    </insert>
+    <select id="selectCommentNum" resultType="int">
+        select MAX(comment_id) from tb_comment
+    </select>
+    <select id="selectCommentList" resultType="commentDto" parameterType="hashmap">
+        select * from tb_comment where pd_id = #{no} and level = 0 order by comment_id desc
+    </select>
+    <select id="selectCommentChild" resultType="commentDto" parameterType="hashmap">
+        select * from tb_comment where pd_id = #{pd_no} and level = #{level} and rootcommentid = #{rootcommentid} and parentcommentid = #{parentcommentid} order by comment_id desc
+    </select>
+</mapper>

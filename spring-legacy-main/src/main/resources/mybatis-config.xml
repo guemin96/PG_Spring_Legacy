@@ -10,6 +10,10 @@
 			<typeAlias type="com.bit.dto.ProductInfo" alias="productInfo"/>
 			<typeAlias type="com.bit.dto.CompanyInfo" alias="companyInfo"/>
 			<typeAlias type="com.bit.dto.CategoryInfo" alias="categoryInfo"/>
+			<typeAlias type="com.bit.dto.CategoryCount" alias="categoryCount"/>
+			<typeAlias type="com.bit.dto.CommentDTO" alias="commentDto"/>
 		</typeAliases>
-
+		<typeHandlers>
+			<typeHandler handler="org.apache.ibatis.type.IntegerTypeHandler" javaType="int" jdbcType="INTEGER" />
+		</typeHandlers>
 	</configuration>

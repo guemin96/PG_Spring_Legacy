@@ -20,6 +20,7 @@
 			$("#product_add").addClass("over");
 			$("#method").val("add");
 
+			$("#no").val("");
 			$("#pdname").val("");
 			$("#pdcountry").val("");
 			$("#pdprice").val("");
@@ -32,13 +33,14 @@
 			var no = row.getElementsByTagName("td")[0].innerHTML;
 
 			$.ajax({
-				url:'${pageContext.request.contextPath}/pdInfo_modify',
+				url:'${pageContext.request.contextPath}/User/pdInfo_modify',
 				type:'post',
 				data:{no:no},
 
 				success: function (data){
 
 					console.log(data)
+					$("#no").val(no);
 					$("#pdname").val(data.pdname);
 					$("#pdcountry").val(data.pdcountry);
 					$("#pdprice").val(data.pdprice);
@@ -54,6 +56,33 @@
 					console.log(error)
 				}
 			});
+		}
+		function pdInfo_delete(button){
+			var row = button.parentNode.parentNode.parentNode;
+			var no = row.getElementsByTagName("td")[0].innerHTML;
+			if (confirm("정말로 삭제하시겠습니까?"))
+			{
+				$.ajax({
+					url:'${pageContext.request.contextPath}/User/pdInfo_delete',
+					type:'post',
+					data:{no:no},
+
+					success: function (data){
+						if (data=="1") {
+							document.location.href = "${pageContext.request.contextPath}/User/productAddPage"
+						}
+						else {
+							alert("삭제하는 과정에서 오류가 발생하였습니다.");
+						}
+					},
+					error: function(error){
+						console.log(error)
+					}
+				});
+			}
+			else {
+				alert("취소버튼을 누르셨습니다.");
+			}
 		}
 	</script>
 </head>
@@ -72,10 +101,10 @@
 			
 				<div class="contents">
 					<div class="btnSet clfix mgb15">
-						<span class="fr"> <span class="button"><a href="#">목록</a></span>
+						<span class="fr"> <span class="button"><a href="${pageContext.request.contextPath}/list">목록</a></span>
 						</span>
 					</div>
-					<form action="${pageContext.request.contextPath}/productAdd" method="post">
+					<form action="${pageContext.request.contextPath}/User/productAddPage" method="post">
 						<table class="bbsWrite mgb35">
 							<caption></caption>
 							<colgroup>
@@ -140,14 +169,14 @@
 											<td>${item.pdprice}</td>
 											<td>
 												<span class="buttonFuc"><input type="button" id="btn_modify" value="수정" onclick="pdInfo_modify(this)"></span>
-												<span class="buttonFuc"><input type="button" id="btn_delete" value="삭제" onclick=""></span>
+												<span class="buttonFuc"><input type="button" id="btn_delete" value="삭제" onclick="pdInfo_delete(this)"></span>
 											</td>
 										</tr>
 									</c:forEach>
 								</tbody>
 							</table>
 						</div>
-						<form action="${pageContext.request.contextPath}/myproductAddORModify" name="frm" method="post"  enctype="multipart/form-data">
+						<form action="${pageContext.request.contextPath}/User/myproductAddORModify" name="frm" method="post"  enctype="multipart/form-data">
 						<div class="tbWrapRt">
 							<ul class="tabA clfix mgb15">
 								<li class="over" id="product_add"><a href="javascript:pdInfo_Add()">01. 상품등록</a></li>
@@ -164,6 +193,7 @@
 									</colgroup>
 									<tbody>
 										<tr>
+											<input type="hidden" id="no" name="no"  value=""/>
 											<th>상품명</th>
 											<td><input type="text" style="border:1px solid #ddd; height:20px;" id="pdname" name="pdname" class="inputText"
 												size="50" /></td>

@@ -13,8 +13,50 @@
 <!-- <link href="../css/contents.css" rel="stylesheet" type="text/css" /> -->
 <link href="${pageContext.request.contextPath}/resources/css/default.css" rel="stylesheet" type="text/css" />
 	<script src="${pageContext.request.contextPath}/resources/JS/MainFunc.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			var tdElements = document.getElementsByClassName('pdprice');
+			var total = 0;
 
-</script>
+			for (var i = 0; i < tdElements.length; i++) {
+				var value = parseFloat(tdElements[i].textContent);
+				total += value;
+			}
+			$("#total").val(total+"원");
+		});
+
+		function mycart_buy(button){
+
+		}
+		function mycart_delete(button){
+			var row = button.parentNode.parentNode.parentNode;
+			var no = row.getElementsByTagName("td")[0].innerHTML;
+			if (confirm("정말로 삭제하시겠습니까?"))
+			{
+				$.ajax({
+					url:'${pageContext.request.contextPath}/User/mycart_delete',
+					type:'post',
+					data:{no:no,id:'${sessionScope.userInfo.id}'},
+
+					success: function (data){
+						if (data=="1") {
+							document.location.href = "${pageContext.request.contextPath}/User/myProductPage"
+						}
+						else {
+							alert("삭제하는 과정에서 오류가 발생하였습니다.");
+						}
+					},
+					error: function(error){
+						console.log(error)
+					}
+				});
+			}
+			else {
+				alert("취소버튼을 누르셨습니다.");
+			}
+		}
+	</script>
 
 </head>
 <body>
@@ -33,30 +75,41 @@
 					<div class="contents">
 					
 					<div class="btnSet clfix mgb15">
-						<span class="fr"> <span class="button"><a href="">목록</a></span>
+						<span class="fr"> <span class="button"><a href="${pageContext.request.contextPath}/list">목록</a></span>
 						</span>
 					</div>
+						<form action="${pageContext.request.contextPath}/User/myProductPage" method="post">
+							<table class="bbsWrite mgb35">
+								<caption></caption>
+								<colgroup>
+									<col width="95" />
+									<col width="395" />
+									<col width="95" />
+									<col />
+								</colgroup>
+								<tbody>
+								<tr>
+									<th>업체명</th>
+									<td>
+										<select id="companyname" name="companyname" style="width: 200px;">
+											<option value="empty" <c:if test="${empty companyname or companyname eq 'empty'}" > selected="selected"</c:if>>선택하세요</option>
 
-					<table class="bbsWrite mgb35">
-						<caption></caption>
-						<colgroup>
-							<col width="95" />
-							<col width="395" />
-							<col width="95" />
-							<col />
-						</colgroup>
-						<tbody>
-							<tr>
-								<th>업체명</th>
-								<td><select style="border:1px solid #ddd; height:20px; width:200px;">
-										<option>선택하세요</option>
-								</select></td>
-								<th>상품명</th>
-								<td><input type="text" name="" class="" size="30" style="border:1px solid #ddd; height:20px;"/>
-									<span class="button"><a href="#">검색</a></span></td>
-							</tr>
-						</tbody>
-					</table>
+											<c:forEach var="item" items="${companyList}">
+												<option value="${item.no_company}" <c:if test="${companyname eq item.no_company}"> selected</c:if>> ${item.name_company}</option>
+											</c:forEach>
+
+										</select>
+									</td>
+									<th>상품명</th>
+									<td>
+										<input type="text" name="productName" class="" size="30" value="${productname}" style="border:1px solid #ddd; height:20px;"/>
+										<span class="button"><input type="submit" id="btn_search" value="검색" ></span>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</form>
+
 							<table class="bbsList">
 								<colgroup>
 									<col width="80" />
@@ -68,8 +121,7 @@
 									<col width="170" />
 									<col width="170" />
 								</colgroup>
-								<thead>								
-								
+								<thead>
 									<tr>
 										<th scope="col">NO.</th>																				
 										<th scope="col">상품명</th>
@@ -82,25 +134,22 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr>
-										<td> </td>
-										<td>										 
-										 </td>
-										<td>
-										<a href=""><img src="" width="50" height="50"></img></a></td>
-										<td></td>
-										<td>
-										</td>
-										<td></td>
-										<td></td>
-										<td>
-										<span class="buttonFuc"><a href="#">구매</a>
-										</span>
-										<span class="buttonFuc">
-										
-											<a href="">삭제</a></span>
-										</td>										
-									</tr>
+									<c:forEach var="item" items="${list}">
+										<tr>
+											<td>${item.no}</td>
+											<td>${item.pdname}</td>
+											<td><img src="${pageContext.request.contextPath}/resources/upload/${item.imgname}" width="50" height="50"/></td>
+											<td>${item.pdcountry}</td>
+											<td class="pdprice">${item.pdprice}</td>
+											<td>${item.pdcategory}</td>
+											<td>${item.pdreg}</td>
+											<td>
+												<span class="buttonFuc"><input type="button" id="btn_buy" value="구매" onclick="mycart_buy(this)"></span>
+												<span class="buttonFuc"><input type="button" id="btn_delete" value="삭제" onclick="mycart_delete(this)"></span>
+
+											</td>
+										</tr>
+									</c:forEach>
 								</tbody>
 							</table>
 							<table class="bbsList" align="right">

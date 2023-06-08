@@ -14,6 +14,7 @@
 <!-- <link href="../css/contents.css" rel="stylesheet" type="text/css" /> -->
 <link href="${pageContext.request.contextPath}/resources/css/default.css" rel="stylesheet" type="text/css" />
 	<script src="${pageContext.request.contextPath}/resources/JS/MainFunc.js"></script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 	<script type="text/javascript">
 		function clearText(){
@@ -29,7 +30,7 @@
 			location.href = "${pageContext.request.contextPath}/productInfo?no="+no;
 		};
 		function registerMove(){
-			location.href = "${pageContext.request.contextPath}/productAddPage";
+			location.href = "${pageContext.request.contextPath}/User/productAddPage";
 		};
 		$(function(){
 
@@ -38,16 +39,32 @@
 			if (!s_userInfo){
 				$('#btn_logout').hide();
 				$('#btn_register').hide();
+				$('#btn_mycart').hide();
 				$('#btn_login').show();
 
 			}
 			else{
 				$('#btn_logout').show();
 				$('#btn_register').show();
+				$('#btn_mycart').show();
 				$('#btn_login').hide();
+
 			}
 		});
+		$(function(){
+			$.ajax({
+				url: '${pageContext.request.contextPath}/ajaxPieChart1',
+				type: 'POST',
+				contentType: 'application/x-www-form-urlencoded;charset=UTF-8',
+				dataType: 'script',
+				success: function(val) {
+					console.log(val);
+				}, error: function(e) {
+					alert('error');
+				}
+			});
 
+		});
 	</script>
 	<style type="text/css">
 		.bbsList tr:hover{
@@ -66,15 +83,16 @@
 			<div id="contentsWrap" class="sub_con5">
 				<div class="board_form">   
 		            <div class="con_title">
-		               <p>상품 등록/보기/수정</p>   
+		               <p>상품 등록/보기/수정</p>
+
 		            </div>
-	
 				<div class="contents">
 					<div class="btnSet clfix mgb15">
 						<span class="fr">
-							<span class="button"><input type="button" id="btn_login" value="로그인" onclick=""></span>
-							<span class="button"><input type="button" id="btn_logout" value="로그아웃" onclick=""></span>
+							<span class="button"><input type="button" id="btn_login" value="로그인" onclick="location.href = '${pageContext.request.contextPath}/login'"></span>
+							<span class="button"><input type="button" id="btn_logout" value="로그아웃" onclick="location.href = '${pageContext.request.contextPath}/logout'"></span>
 							<span class="button"><input type="button" id="btn_register" value="등록" onclick="registerMove()"></span>
+							<span class="button"><input type="button" id="btn_mycart" onclick="location.href = '${pageContext.request.contextPath}/User/myProductPage'" value="장바구니"/> </span>
 						</span>
 					</div>
                    <form id="form" action="${pageContext.request.contextPath}/list" method="post">
@@ -190,7 +208,7 @@
 					</div>
 				</div>
 			</div>
-	
+		<div id="piechart" style="width: 400px; height: 200px;"></div>
   <!--Footer-->
      
    <!--END Footer-->	
